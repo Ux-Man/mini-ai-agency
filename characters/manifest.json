@@ -1,0 +1,45 @@
+{
+  "note": "Creation pages are not GLB assets. Download licensed GLB and place in characters/employee-NN.glb. Mappings correspond to matching avatar profiles; eight models currently available.",
+  "models": [
+    {
+      "employee": 1,
+      "name": "Fahad",
+      "creation": "rgdrrOhxtc"
+    },
+    {
+      "employee": 2,
+      "name": "Noura",
+      "creation": "yiu4RJtPW9"
+    },
+    {
+      "employee": 3,
+      "name": "Oliver",
+      "creation": "BhN8QR1oQR"
+    },
+    {
+      "employee": 5,
+      "name": "Maya",
+      "creation": "eIPXhXodqL"
+    },
+    {
+      "employee": 8,
+      "name": "Adam",
+      "creation": "lJtSPwEgv9"
+    },
+    {
+      "employee": 11,
+      "name": "Lina",
+      "creation": "yiu4zF3PW9"
+    },
+    {
+      "employee": 15,
+      "name": "Abdullah",
+      "creation": "mEZv5RBhJQ"
+    },
+    {
+      "employee": 17,
+      "name": "Aisha",
+      "creation": "xSBLPdgjfW"
+    }
+  ]
+}
