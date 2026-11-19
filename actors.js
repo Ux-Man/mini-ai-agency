@@ -21,11 +21,11 @@ export function animateActor(model,time,seed,kind='desk'){
   return;
  }
  if(b.seatedRoot)b.seatedRoot.position.y=Math.sin(t*1.1)*.0018;
- const mouse=kind==='desk'&&Math.sin(t*.2)>.35;
+ const mouseWeight=kind==='desk'?T.MathUtils.smoothstep(Math.sin(t*.2),.2,.55):0;
  for(const [side,offset] of [['left',0],['right',1.8]]){
   const wrist=b[side+'Wrist'],elbow=b[side+'Elbow'];
-  if(wrist){wrist.rotation.x=kind==='meeting'?Math.sin(t*.7+offset)*.018:Math.sin(t*(mouse&&side==='right'?1.5:7.5)+offset)*.035;wrist.rotation.z=Math.sin(t*(kind==='meeting'?.55:5.7)+offset)*.02;}
-  if(elbow){elbow.rotation.y=mouse&&side==='right'?Math.sin(t*.9)*.035:Math.sin(t*.8+offset)*.004;elbow.rotation.x=Math.sin(t*(kind==='meeting'?.6:4.4)+offset)*.008;}
+  if(wrist){wrist.rotation.x=kind==='meeting'?Math.sin(t*.7+offset)*.018:side==='right'?T.MathUtils.lerp(Math.sin(t*7.5+offset)*.035,Math.sin(t*1.5+offset)*.015,mouseWeight):Math.sin(t*7.5+offset)*.035;wrist.rotation.z=Math.sin(t*(kind==='meeting'?.55:5.7)+offset)*.02;}
+  if(elbow){elbow.rotation.y=side==='right'?T.MathUtils.lerp(Math.sin(t*.8+offset)*.004,.22+Math.sin(t*.9)*.025,mouseWeight):Math.sin(t*.8+offset)*.004;elbow.rotation.x=Math.sin(t*(kind==='meeting'?.6:4.4)+offset)*.008;}
  }
 }
 
