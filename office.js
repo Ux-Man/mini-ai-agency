@@ -13,6 +13,7 @@ import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
 
 export function createOffice({canvas,roles,people,onSelect,onStatus}){
 RectAreaLightUniformsLib.init();
+const assets='https://raw.githubusercontent.com/Ux-Man/mini-ai-agency/0685215b09fcff96deeb4b94de431f25597cd714/assets/';
 const scene=new T.Scene();scene.background=new T.Color('#b9c6cc');scene.fog=new T.Fog('#c5ced0',24,65);
 const camera=new T.PerspectiveCamera(49,1,.08,100);
 const renderer=new T.WebGLRenderer({canvas,antialias:true,powerPreference:'high-performance'});
@@ -21,11 +22,11 @@ const controls=new OrbitControls(camera,canvas);controls.enableDamping=true;cont
 camera.position.set(3.6,1.95,7.5);controls.update();
 const hemi=new T.HemisphereLight('#dde8e9','#8f694b',.65);scene.add(hemi);
 const sun=new T.DirectionalLight('#fff0db',2.0);sun.position.set(-9,11,5);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-15,right:15,top:15,bottom:-15,near:.5,far:40});sun.shadow.normalBias=.025;sun.shadow.bias=-.0002;scene.add(sun);
-new RGBELoader().load('./assets/studio.hdr',hdr=>{hdr.mapping=T.EquirectangularReflectionMapping;const pmrem=new T.PMREMGenerator(renderer);scene.environment=pmrem.fromEquirectangular(hdr).texture;hdr.dispose();pmrem.dispose();},undefined,()=>onStatus('Office ready · environment map unavailable'));
+new RGBELoader().load(assets+'studio.hdr',hdr=>{hdr.mapping=T.EquirectangularReflectionMapping;const pmrem=new T.PMREMGenerator(renderer);scene.environment=pmrem.fromEquirectangular(hdr).texture;hdr.dispose();pmrem.dispose();},undefined,()=>onStatus('Office ready · environment map unavailable'));
 const loader=new T.TextureLoader();
 function tex(url,rx=1,ry=1){const t=loader.load(url);t.wrapS=t.wrapT=T.RepeatWrapping;t.repeat.set(rx,ry);t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;}
-const woodMap=tex('./assets/wood.jpg');woodMap.colorSpace=T.SRGBColorSpace;const woodNormal=tex('./assets/wood-normal.jpg');
-const floorMap=tex('./assets/stone.jpg',8,8);floorMap.colorSpace=T.SRGBColorSpace;
+const woodMap=tex(assets+'wood.jpg');woodMap.colorSpace=T.SRGBColorSpace;const woodNormal=tex(assets+'wood-normal.jpg');
+const floorMap=tex(assets+'stone.jpg',8,8);floorMap.colorSpace=T.SRGBColorSpace;
 const material=(color,roughness=.6,metalness=0)=>new T.MeshStandardMaterial({color,roughness,metalness});
 const wood=new T.MeshStandardMaterial({map:woodMap,normalMap:woodNormal,normalScale:new T.Vector2(.12,.12),roughness:.48,color:'#ffffff'}),walnut=new T.MeshStandardMaterial({map:woodMap,color:'#b5885f',roughness:.52});
 const black=material('#171c20',.35,.55),dark=material('#293134',.57),aluminium=material('#90989d',.23,.85),cream=material('#cfc5b3',.74),leather=material('#9f542d',.5),stone=new T.MeshStandardMaterial({map:floorMap,color:'#c8c5bd',roughness:.24,metalness:.07});
@@ -114,10 +115,10 @@ for(const [name,z] of [['QUIET / PRAYER',-4.5],['RESTROOMS',2]]){box(4.8,.07,4,c
 const assetIds=[1,2,3,5,8,11,15,17],models=new Map(),assetByRole=[1,2,3,2,5,1,2,8,2,3,11,1,8,11,15,3,17,11];
 const gltf=new GLTFLoader();let loaded=0,failed=0;
 async function loadFurniture(){
- try{const p=await gltf.loadAsync('./assets/potted_plant_02.glb');p.scene.traverse(o=>{if(o.isMesh&&o.material?.name?.includes('_pot')){const m=o.material.clone();m.map=null;m.color.set('#d2cbbd');m.roughness=.72;o.material=m;}});const b=new T.Box3().setFromObject(p.scene),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());
+ try{const p=await gltf.loadAsync(assets+'potted_plant_02.glb');p.scene.traverse(o=>{if(o.isMesh&&o.material?.name?.includes('_pot')){const m=o.material.clone();m.map=null;m.color.set('#d2cbbd');m.roughness=.72;o.material=m;}});const b=new T.Box3().setFromObject(p.scene),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());
  for(const slot of plantSlots){slot.group.clear();const model=p.scene.clone(true),s=slot.height/size.y;model.scale.setScalar(s);model.position.set(-c.x*s,-b.min.y*s,-c.z*s);model.rotation.y=(slot.group.position.x+slot.group.position.z)*.8;model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});slot.group.add(model);}}
  catch(e){console.warn('Plant asset unavailable',e);}
- try{const p=await gltf.loadAsync('./assets/sofa_03.glb');const b=new T.Box3().setFromObject(p.scene),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),s=2.9/size.x;const model=p.scene;model.scale.setScalar(s);model.position.set(-c.x*s,-b.min.y*s,-c.z*s);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});sofaSlot.clear();const holder=new T.Group();holder.rotation.y=Math.PI;holder.add(model);sofaSlot.add(holder);}
+ try{const p=await gltf.loadAsync(assets+'sofa_03.glb');const b=new T.Box3().setFromObject(p.scene),size=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3()),s=2.9/size.x;const model=p.scene;model.scale.setScalar(s);model.position.set(-c.x*s,-b.min.y*s,-c.z*s);model.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;}});sofaSlot.clear();const holder=new T.Group();holder.rotation.y=Math.PI;holder.add(model);sofaSlot.add(holder);}
  catch(e){console.warn('Sofa asset unavailable',e);}
 }
 async function load(id){try{const source=await gltf.loadAsync(`https://ma21foh9cxu9ar68.public.blob.vercel-storage.com/characters/employee-${String(id).padStart(2,'0')}.glb`);const model=seatedCharacter(source.scene);if(MeshoptSimplifier.supported){await MeshoptSimplifier.ready;model.traverse(o=>{if(!o.isMesh||!o.geometry.index)return;const geo=o.geometry;const indices=new Uint32Array(geo.index.array);const target=Math.floor(indices.length*.22/3)*3;const [simple]=MeshoptSimplifier.simplify(indices,geo.attributes.position.array,3,target,.002,['LockBorder']);geo.setIndex(new T.BufferAttribute(simple,1));});}models.set(id,model);for(let i=0;i<18;i++)if(assetByRole[i]===id){const person=model.clone(true);person.traverse(o=>{if(o.isMesh){o.userData.agent=i;pick.push(o);}});stations[i].seat.add(person);staff.set(i,person);}loaded++;}catch(e){failed++;console.warn('Character asset unavailable',id,e);}onStatus(`Staff ${loaded}/8${failed?' · '+failed+' unavailable':''}`);}
