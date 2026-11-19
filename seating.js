@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 
-// The generated staff are static A-pose meshes, not animated skeletons.
-// Work in metres, then bend the existing mesh into a seated rest pose.
+// Normalize the generated A-pose assets, then bind a small seated arm rig.
 export function seatedCharacter(source) {
   source.updateMatrixWorld(true);
   const bounds=new THREE.Box3().setFromObject(source),height=bounds.max.y-bounds.min.y;
@@ -21,6 +20,7 @@ export function seatedCharacter(source) {
     const upperQ=new THREE.Quaternion().setFromUnitVectors(elbow.clone().sub(shoulder).normalize(),seatedElbow.clone().sub(seatedShoulder).normalize());
     const lowerQ=new THREE.Quaternion().setFromUnitVectors(wrist.clone().sub(elbow).normalize(),seatedWrist.clone().sub(seatedElbow).normalize());
     const armAxis=wrist.clone().sub(shoulder),armLengthSq=armAxis.lengthSq(),twistAxis=seatedWrist.clone().sub(seatedElbow).normalize();
+    const skinIndices=new Uint16Array(pos.count*4),skinWeights=new Float32Array(pos.count*4);
     for(let i=0;i<pos.count;i++){
       const x=(pos.getX(i)-center.x)*scale,y=(pos.getY(i)-bounds.min.y)*scale,z=(pos.getZ(i)-center.z)*scale;
       let ny=y-.43,nz=z;
@@ -33,6 +33,10 @@ export function seatedCharacter(source) {
       const distance=Math.hypot(ax-(shoulder.x+armAxis.x*progress),y-(shoulder.y+armAxis.y*progress));
       let arm=(1-THREE.MathUtils.smoothstep(distance,.10,.18))*THREE.MathUtils.smoothstep(ax,.16,.25);
       if(y<tipY-.18||y>1.55)arm=0;
+      const fore=THREE.MathUtils.smoothstep(progress,.40,.65),hand=THREE.MathUtils.smoothstep(progress,.85,1.12);
+      const base=side<0?1:4,k=i*4;
+      skinIndices[k]=0;skinIndices[k+1]=base;skinIndices[k+2]=base+1;skinIndices[k+3]=base+2;
+      skinWeights[k]=1-arm;skinWeights[k+1]=arm*(1-fore);skinWeights[k+2]=arm*fore*(1-hand);skinWeights[k+3]=arm*fore*hand;
       let nx=x;
       if(arm>0){
         const p=new THREE.Vector3(ax,y,z);
@@ -45,7 +49,14 @@ export function seatedCharacter(source) {
       pos.setXYZ(i,nx,ny,nz);
     }
     pos.needsUpdate=true;geo.computeVertexNormals();geo.computeBoundingBox();geo.computeBoundingSphere();
-    const mesh=new THREE.Mesh(geo,node.material);mesh.castShadow=true;mesh.receiveShadow=true;result.add(mesh);
+    geo.setAttribute('skinIndex',new THREE.Uint16BufferAttribute(skinIndices,4));geo.setAttribute('skinWeight',new THREE.Float32BufferAttribute(skinWeights,4));
+    const root=new THREE.Bone();root.name='seatedRoot';const bones=[root];
+    for(const side of [-1,1]){
+      const shoulderBone=new THREE.Bone();shoulderBone.name=side<0?'leftShoulder':'rightShoulder';shoulderBone.position.set(side*.19,1,0);root.add(shoulderBone);
+      const elbowBone=new THREE.Bone();elbowBone.name=side<0?'leftElbow':'rightElbow';elbowBone.position.set(side*.11,-.20,.035);shoulderBone.add(elbowBone);
+      const wristBone=new THREE.Bone();wristBone.name=side<0?'leftWrist':'rightWrist';wristBone.position.set(-side*.12,.05,.365);elbowBone.add(wristBone);bones.push(shoulderBone,elbowBone,wristBone);
+    }
+    const mesh=new THREE.SkinnedMesh(geo,node.material);mesh.add(root);mesh.bind(new THREE.Skeleton(bones));mesh.castShadow=true;mesh.receiveShadow=true;mesh.frustumCulled=false;result.add(mesh);
   });
   return result;
 }
