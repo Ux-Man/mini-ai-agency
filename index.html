@@ -69,6 +69,9 @@ const head=human;
 const label=new THREE.Mesh(new THREE.PlaneGeometry(.8,.2),textCanvas(r[0],i+1));label.position.set(0,.94,.55);label.rotation.x=-Math.PI/2;group.add(label);const zone=cube(3.6,.06,3.2,new THREE.MeshBasicMaterial({color:colors[i%6],transparent:true,opacity:.07}),0,-.08,.45,group);[top,head,zone].forEach(mesh=>{mesh.userData.agent=i;pickMeshes.push(mesh)});desks.push({group,zone,head,human})});
 
 // Workspace upgrade: acoustic screens, ergonomic task chairs, planting, lighting and lounge.
+// Keep pod materials and the tapered cylinder helper local to this furnishing pass.
+// The annex below has its own materials and a different cylinder signature.
+{
 const graphite=mat('#29313b',.63),upholstery=mat('#5d6468',.92),oak=mat('#b48a62',.56),leaf=mat('#3d6746',.82),planter=mat('#d9d0c4',.88);
 function cylinder(r1,r2,h,m,x,y,z,parent=scene){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,12),m);o.position.set(x,y,z);o.castShadow=true;parent.add(o);return o}
 for(const [i,d] of desks.entries()){
@@ -104,6 +107,7 @@ for(const x of [-8.5,0,8.5])for(const z of [-5,2.3,9]){
  cube(.018,.55,.018,graphite,x-1.5,4.13,z);cube(.018,.55,.018,graphite,x+1.5,4.13,z);
 }
 // User-supplied GLB characters are loaded into the selected workstation, without remote uploads.
+}
 const gltfLoader=new GLTFLoader();
 const customCharacters=new Map(),characterMixers=new Map();
 const modelPaths=Array.from({length:18},(_,i)=>'./characters/employee-'+String(i+1).padStart(2,'0')+'.glb');
